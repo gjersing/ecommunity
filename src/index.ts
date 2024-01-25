@@ -49,7 +49,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: () => ({ em: fork }),
+    context: ({ req, res }) => ({ em: fork, req, res }),
   });
 
   await apolloServer.start();
