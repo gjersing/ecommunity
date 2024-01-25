@@ -1,3 +1,5 @@
 ECOmmunity - The Neighborhood Nature App
-  
-Tech: React, GraphQL, Node, Postgresql
+
+This repository contains the backend server logic for the application.
+
+Tech: GraphQL, Node, Express, MikroORM, Postgresql
