@@ -11,6 +11,7 @@ import { UserResolver } from "./resolvers/user";
 import * as redis from "redis";
 import RedisStore from "connect-redis";
 import session from "express-session";
+import cors from "cors";
 
 const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
@@ -27,6 +28,13 @@ const main = async () => {
     prefix: "myapp:",
     disableTouch: true,
   });
+
+  app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+    }),
+  );
 
   app.use(
     session({
@@ -53,7 +61,10 @@ const main = async () => {
   });
 
   await apolloServer.start();
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({
+    app,
+    cors: false,
+  });
 
   app.listen(__port__, () => {
     console.log(`Server started successfully on localhost:${__port__}`);
