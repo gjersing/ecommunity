@@ -4,7 +4,13 @@ import mikroOrmConfig from "./mikro-orm.config";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
-import { __port__, __prod__ } from "./constants";
+import {
+  LOCAL_ORIGIN,
+  PROD_ORIGIN,
+  SESSION_COOKIE_NAME,
+  __port__,
+  __prod__,
+} from "./constants";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
@@ -31,14 +37,14 @@ const main = async () => {
 
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: __prod__ ? PROD_ORIGIN : LOCAL_ORIGIN,
       credentials: true,
     }),
   );
 
   app.use(
     session({
-      name: "qid",
+      name: SESSION_COOKIE_NAME,
       store: redisStore,
       cookie: {
         maxAge: 31536000000, // 1 year
