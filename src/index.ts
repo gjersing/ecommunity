@@ -18,10 +18,8 @@ import * as redis from "redis";
 import RedisStore from "connect-redis";
 import session from "express-session";
 import cors from "cors";
-import { sendEmail } from "./utils/mailer";
 
 const main = async () => {
-  sendEmail("bob@bob.com", "You have requested a password reset.");
   const orm = await MikroORM.init(mikroOrmConfig);
   await orm.getMigrator().up();
   const fork = orm.em.fork();
