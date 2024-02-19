@@ -50,8 +50,9 @@ export class UserResolver {
   ): Promise<UserResponse> {
     const errors = validateRegister(options);
     if (errors) {
-      return errors;
+      return { errors };
     }
+
     const hashedPassword = await argon2.hash(options.password);
     const user = em.create(User, {
       email: options.email,
@@ -79,13 +80,13 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("usernameOrPassword") usernameOrPassword: string,
+    @Arg("usernameOrEmail") usernameOrEmail: string,
     @Arg("password") password: string,
     @Ctx() { em, req }: MyContext,
   ): Promise<UserResponse> {
-    const userSearchArgument = usernameOrPassword.includes("@")
-      ? { username: usernameOrPassword }
-      : { email: usernameOrPassword };
+    const userSearchArgument = usernameOrEmail.includes("@")
+      ? { username: usernameOrEmail }
+      : { email: usernameOrEmail };
 
     const user = await em.findOne(User, userSearchArgument);
     if (!user) {

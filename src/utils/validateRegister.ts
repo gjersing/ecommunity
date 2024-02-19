@@ -6,44 +6,37 @@ const regexp = new RegExp(
 
 export const validateRegister = (options: UsernamePasswordInput) => {
   if (!regexp.test(options.email)) {
-    return {
-      errors: [
-        {
-          field: "email",
-          message: "Email is in an invalid format",
-        },
-      ],
-    };
+    return [
+      {
+        field: "email",
+        message: "Email is in an invalid format",
+      },
+    ];
   }
+
   if (options.username.includes("@")) {
-    return {
-      errors: [
-        {
-          field: "username",
-          message: "Contains an invalid character '@'",
-        },
-      ],
-    };
+    return [
+      {
+        field: "username",
+        message: "Contains an invalid character '@'",
+      },
+    ];
   }
   if (options.username.length < 2) {
-    return {
-      errors: [
-        {
-          field: "username",
-          message: "Length must be greater than 2",
-        },
-      ],
-    };
+    return [
+      {
+        field: "username",
+        message: "Length must be greater than 2",
+      },
+    ];
   }
   if (options.password.length < 3) {
-    return {
-      errors: [
-        {
-          field: "password",
-          message: "Length must be greater than 3",
-        },
-      ],
-    };
+    return [
+      {
+        field: "password",
+        message: "Length must be greater than 3",
+      },
+    ];
   }
 
   return null;
