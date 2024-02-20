@@ -85,8 +85,8 @@ export class UserResolver {
     @Ctx() { em, req }: MyContext,
   ): Promise<UserResponse> {
     const userSearchArgument = usernameOrEmail.includes("@")
-      ? { username: usernameOrEmail }
-      : { email: usernameOrEmail };
+      ? { email: usernameOrEmail }
+      : { username: usernameOrEmail };
 
     const user = await em.findOne(User, userSearchArgument);
     if (!user) {
