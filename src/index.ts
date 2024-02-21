@@ -14,7 +14,7 @@ import {
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import * as redis from "redis";
+import Redis from "ioredis";
 import RedisStore from "connect-redis";
 import session from "express-session";
 import cors from "cors";
@@ -26,11 +26,9 @@ const main = async () => {
 
   const app = express();
 
-  const redisClient = redis.createClient();
-  redisClient.connect().catch(console.error);
-
+  const redis = new Redis();
   const redisStore = new RedisStore({
-    client: redisClient,
+    client: redis,
     prefix: "myapp:",
     disableTouch: true,
   });
@@ -63,7 +61,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ em: fork, req, res }),
+    context: ({ req, res }) => ({ em: fork, req, res, redis }),
   });
 
   await apolloServer.start();
