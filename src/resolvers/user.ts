@@ -1,6 +1,12 @@
 import { User } from "../entities/User";
 import argon2 from "argon2";
-import { SESSION_COOKIE_NAME } from "../constants";
+import {
+  LOCAL_ORIGIN,
+  PROD_ORIGIN,
+  RESET_PASSWORD_PREFIX,
+  SESSION_COOKIE_NAME,
+  __prod__,
+} from "../constants";
 import { MyContext } from "src/types";
 import {
   Field,
@@ -13,6 +19,8 @@ import {
 } from "type-graphql";
 import { UsernamePasswordInput } from "./UsernamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
+import { sendEmail } from "../utils/mailer";
+import { v4 } from "uuid";
 
 @ObjectType()
 class FieldError {
@@ -133,9 +141,25 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async resetPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
+  async resetPassword(
+    @Arg("email") email: string,
+    @Ctx() { em, redis }: MyContext,
+  ) {
     const user = await em.findOne(User, { email });
 
-    return user ? true : false;
+    if (!user) {
+      return true;
+    }
+
+    const url = __prod__ ? PROD_ORIGIN : LOCAL_ORIGIN;
+    const token = v4();
+    await redis.set(RESET_PASSWORD_PREFIX + token, user.id, "EX", 3600 * 24);
+
+    await sendEmail(
+      user.email,
+      `<a href="${url}/reset-password/${token}">Reset ECOmmunity Password</a>`,
+    );
+
+    return true;
   }
 }
