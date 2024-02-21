@@ -18,7 +18,6 @@
     "@types/express-session": "^1.17.10",
     "@types/node": "^20.10.8",
     "@types/nodemailer": "^6.4.14",
-    "@types/uuid": "^9.0.8",
     "nodemon": "^3.0.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
@@ -40,8 +39,7 @@
     "pg": "^8.11.3",
     "prettier": "^3.2.1",
     "reflect-metadata": "^0.2.1",
-    "type-graphql": "^1.1.1",
-    "uuid": "^9.0.1"
+    "type-graphql": "^1.1.1"
   },
   "mikro-orm": {
     "useTsNode": true,

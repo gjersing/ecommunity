@@ -20,7 +20,6 @@ import {
 import { UsernamePasswordInput } from "./UsernamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
 import { sendEmail } from "../utils/mailer";
-import { v4 } from "uuid";
 
 @ObjectType()
 class FieldError {
@@ -152,7 +151,7 @@ export class UserResolver {
     }
 
     const url = __prod__ ? PROD_ORIGIN : LOCAL_ORIGIN;
-    const token = v4();
+    const token = crypto.randomUUID();
     await redis.set(RESET_PASSWORD_PREFIX + token, user.id, "EX", 3600 * 24);
 
     await sendEmail(
