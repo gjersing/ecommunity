@@ -152,7 +152,7 @@ export class UserResolver {
 
     const url = __prod__ ? PROD_ORIGIN : LOCAL_ORIGIN;
     const token = crypto.randomUUID();
-    await redis.set(RESET_PASSWORD_PREFIX + token, user.id, "EX", 3600 * 24);
+    await redis.set(RESET_PASSWORD_PREFIX + token, user.id, "EX", 3600 * 72);
 
     await sendEmail(
       user.email,
