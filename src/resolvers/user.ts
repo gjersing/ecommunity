@@ -186,6 +186,7 @@ export class UserResolver {
     await em.persistAndFlush(user);
 
     req.session.userId = user.id;
+    await redis.del(RESET_PASSWORD_PREFIX + token);
 
     return { user };
   }
