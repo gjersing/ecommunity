@@ -15,8 +15,6 @@ import { isAuth } from "../middleware/isAuth";
 @InputType()
 class PostInput {
   @Field()
-  title: string;
-  @Field()
   body?: string;
 }
 
@@ -50,14 +48,14 @@ export class PostResolver {
   @Mutation(() => Post, { nullable: true })
   async updatePost(
     @Arg("id") id: number,
-    @Arg("title", () => String, { nullable: true }) title: string,
+    @Arg("body", () => String, { nullable: true }) body: string,
   ): Promise<Post | null> {
     const post = await Post.findOne({ where: { id } });
     if (!post) {
       return null;
     }
-    if (typeof title !== "undefined") {
-      await Post.update({ id }, { title });
+    if (typeof body !== "undefined") {
+      await Post.update({ id }, { body });
     }
     return post;
   }
