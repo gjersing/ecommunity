@@ -4,13 +4,18 @@ import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   InputType,
+  Int,
   Mutation,
   Query,
   Resolver,
+  Root,
   UseMiddleware,
 } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
+import { AppDataSource } from "../data-source";
+import { User } from "../entities/User";
 
 @InputType()
 class PostInput {
@@ -18,11 +23,26 @@ class PostInput {
   body?: string;
 }
 
-@Resolver()
+@Resolver(Post)
 export class PostResolver {
+  @FieldResolver(() => User)
   @Query(() => [Post])
-  posts(): Promise<Post[]> {
-    return Post.find();
+  async posts(
+    @Arg("limit", () => Int) limit: number,
+    @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
+  ): Promise<Post[]> {
+    const trueLimit = Math.min(50, limit);
+
+    const qb = AppDataSource.getRepository(Post)
+      .createQueryBuilder("posts")
+      .orderBy('"createdAt"', "DESC")
+      .take(trueLimit);
+
+    if (cursor) {
+      qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+    }
+
+    return qb.getMany();
   }
 
   @Query(() => Post, { nullable: true })

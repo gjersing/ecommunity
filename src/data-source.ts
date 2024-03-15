@@ -1,13 +1,13 @@
 import { DataSource } from "typeorm";
-import { Post } from "./entities/Post";
-import { User } from "./entities/User";
+import path from "path";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
   username: "postgres",
   password: "postgres",
   database: "ecommunity-db",
-  entities: [Post, User],
+  entities: [path.join(__dirname, "./entities/*")],
+  migrations: [path.join(__dirname, "./migrations/*")],
   logging: true,
   synchronize: true,
 });

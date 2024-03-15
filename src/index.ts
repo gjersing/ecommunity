@@ -19,7 +19,7 @@ import cors from "cors";
 import { AppDataSource } from "./data-source";
 
 const main = async () => {
-  AppDataSource.initialize();
+  await AppDataSource.initialize();
 
   const app = express();
 
