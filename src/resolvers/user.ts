@@ -16,6 +16,8 @@ import {
   Mutation,
   Ctx,
   ObjectType,
+  FieldResolver,
+  Root,
 } from "type-graphql";
 import { UsernamePasswordInput } from "./UsernamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
@@ -39,8 +41,16 @@ class UserResponse {
   user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: MyContext) {
+    if (req.session.userId === user.id) {
+      return user.email;
+    }
+    return "";
+  }
+
   @Query(() => User, { nullable: true })
   current_user(@Ctx() { req }: MyContext) {
     if (!req.session.userId) {
@@ -76,10 +86,8 @@ export class UserResolver {
         ])
         .returning("*")
         .execute();
-      console.log("result: ", result);
       user = result.raw[0];
     } catch (err) {
-      console.log("err: ", err);
       if (err.code === "23505") {
         return {
           errors: [
@@ -141,7 +149,6 @@ export class UserResolver {
     return new Promise((resolve) =>
       req.session.destroy((err) => {
         if (err) {
-          console.log(err);
           resolve(false);
           return;
         }

@@ -4,11 +4,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  // ManyToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-// import { User } from "./User";
+import { User } from "./User";
 
 @ObjectType() // Identifies class to GraphQL
 @Entity()
@@ -21,9 +21,9 @@ export class Post extends BaseEntity {
   @Column()
   authorId: number;
 
-  // @Field(() => User)
-  // @ManyToOne(() => User, (author) => author.posts)
-  // author: User;
+  @Field()
+  @ManyToOne(() => User, (author) => author.posts)
+  author: User;
 
   @Field()
   @Column()

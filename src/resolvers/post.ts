@@ -39,16 +39,24 @@ export class PostResolver {
     const trueLimit = Math.min(20, limit);
     const trueLimitPlusOne = trueLimit + 1;
 
-    const qb = AppDataSource.getRepository(Post)
-      .createQueryBuilder("posts")
-      .orderBy('"createdAt"', "DESC")
-      .take(trueLimitPlusOne);
+    const replacements: any[] = [trueLimitPlusOne];
 
     if (cursor) {
-      qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+      replacements.push(new Date(parseInt(cursor)));
     }
 
-    const posts = await qb.getMany();
+    const posts = await AppDataSource.query(
+      `
+    select p.*, 
+    json_build_object('id', u.id, 'username', u.username, 'email', u.email) author
+    from post p
+    inner join public.user u on u.id = p."authorId"
+    ${cursor ? `where p."createdAt" < $2` : ""}
+    order by p."createdAt" DESC
+    limit $1
+    `,
+      replacements,
+    );
 
     return {
       posts: posts.slice(0, trueLimit),
