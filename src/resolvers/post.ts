@@ -4,18 +4,15 @@ import {
   Arg,
   Ctx,
   Field,
-  FieldResolver,
   InputType,
   Int,
   Mutation,
   Query,
   Resolver,
-  Root,
   UseMiddleware,
 } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { AppDataSource } from "../data-source";
-import { User } from "../entities/User";
 
 @InputType()
 class PostInput {
@@ -25,7 +22,6 @@ class PostInput {
 
 @Resolver(Post)
 export class PostResolver {
-  @FieldResolver(() => User)
   @Query(() => [Post])
   async posts(
     @Arg("limit", () => Int) limit: number,
