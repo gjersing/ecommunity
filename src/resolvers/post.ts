@@ -7,6 +7,7 @@ import {
   InputType,
   Int,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
   UseMiddleware,
@@ -20,25 +21,39 @@ class PostInput {
   body?: string;
 }
 
+@ObjectType()
+class PaginatedPosts {
+  @Field(() => [Post])
+  posts: Post[];
+  @Field()
+  hasMore: boolean;
+}
+
 @Resolver(Post)
 export class PostResolver {
-  @Query(() => [Post])
+  @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
-  ): Promise<Post[]> {
-    const trueLimit = Math.min(50, limit);
+  ): Promise<PaginatedPosts> {
+    const trueLimit = Math.min(20, limit);
+    const trueLimitPlusOne = trueLimit + 1;
 
     const qb = AppDataSource.getRepository(Post)
       .createQueryBuilder("posts")
       .orderBy('"createdAt"', "DESC")
-      .take(trueLimit);
+      .take(trueLimitPlusOne);
 
     if (cursor) {
       qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
     }
 
-    return qb.getMany();
+    const posts = await qb.getMany();
+
+    return {
+      posts: posts.slice(0, trueLimit),
+      hasMore: posts.length === trueLimitPlusOne,
+    };
   }
 
   @Query(() => Post, { nullable: true })
