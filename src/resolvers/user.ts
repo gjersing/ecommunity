@@ -89,11 +89,12 @@ export class UserResolver {
       user = result.raw[0];
     } catch (err) {
       if (err.code === "23505") {
+        const field = err.detail.includes("email") ? "email" : "username";
         return {
           errors: [
             {
-              field: "username",
-              message: "username has already been taken",
+              field: field,
+              message: `${field} is already in use`,
             },
           ],
         };

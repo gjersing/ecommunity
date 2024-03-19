@@ -22,11 +22,11 @@ export const validateRegister = (options: UsernamePasswordInput) => {
       },
     ];
   }
-  if (options.username.length < 2) {
+  if (options.username.length < 2 || options.username.length > 40) {
     return [
       {
         field: "username",
-        message: "Length must be greater than 2",
+        message: "Length must be greater than 2 and less than 40",
       },
     ];
   }
