@@ -5,10 +5,12 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { User } from "./User";
+import { Like } from "./Like";
 
 @ObjectType() // Identifies class to GraphQL
 @Entity()
@@ -32,6 +34,9 @@ export class Post extends BaseEntity {
   @Field()
   @Column({ type: "int", default: 0 })
   points!: number;
+
+  @OneToMany(() => Like, (like) => like.post)
+  likes: Like[];
 
   @Field(() => String)
   @CreateDateColumn()
