@@ -31,6 +31,27 @@ class PaginatedPosts {
 
 @Resolver(Post)
 export class PostResolver {
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async like(
+    @Arg("postId", () => Int) postId: number,
+    @Ctx() { req }: MyContext,
+  ) {
+    const { userId } = req.session;
+
+    await AppDataSource.query(
+      `START TRANSACTION;
+    insert into like ("userId", "postId")
+    values (${userId},${postId});
+    update post
+    set points = points + 1
+    where id = ${postId};
+    COMMIT;`,
+    );
+
+    return true;
+  }
+
   @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
