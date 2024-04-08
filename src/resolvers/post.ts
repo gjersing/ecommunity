@@ -72,11 +72,14 @@ export class PostResolver {
   async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
+    @Ctx() { req }: MyContext,
   ): Promise<PaginatedPosts> {
     const trueLimit = Math.min(20, limit);
     const trueLimitPlusOne = trueLimit + 1;
 
-    const replacements: any[] = [trueLimitPlusOne];
+    const { userId } = req.session;
+
+    const replacements: any[] = [trueLimitPlusOne, userId];
 
     if (cursor) {
       replacements.push(new Date(parseInt(cursor)));
@@ -86,9 +89,11 @@ export class PostResolver {
       `
     select p.*, 
     json_build_object('id', u.id, 'username', u.username, 'email', u.email) author
+    ,
+    (select "userId" from "like" where "userId" = $2 and "postId" = p.id) "likeStatus"
     from post p
     inner join public.user u on u.id = p."authorId"
-    ${cursor ? `where p."createdAt" < $2` : ""}
+    ${cursor ? `where p."createdAt" < $3` : ""}
     order by p."createdAt" DESC
     limit $1
     `,
