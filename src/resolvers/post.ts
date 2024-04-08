@@ -41,8 +41,8 @@ export class PostResolver {
 
     await AppDataSource.query(
       `START TRANSACTION;
-    insert into like ("userId", "postId")
-    values (${userId},${postId});
+    INSERT INTO "like" ("userId", "postId")
+    VALUES (${userId}, ${postId});
     update post
     set points = points + 1
     where id = ${postId};
