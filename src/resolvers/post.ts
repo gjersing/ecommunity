@@ -45,15 +45,19 @@ export class PostResolver {
     if (like) {
       await AppDataSource.transaction(async (tm) => {
         await like.remove();
-        await tm.query(`update post
+        await tm.query(
+          `update post
         set points = points - 1
-        where id = ${postId};`);
+        where id = $1;`,
+          [postId],
+        );
       });
     } else {
       await AppDataSource.transaction(async (tm) => {
         await tm.query(
           `INSERT INTO "like" ("userId", "postId")
-          VALUES (${userId}, ${postId});`,
+          VALUES ($1, $2);`,
+          [userId, postId],
         );
         await tm.query(`update post
         set points = points + 1
