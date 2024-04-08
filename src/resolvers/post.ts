@@ -1,5 +1,6 @@
 import { MyContext } from "src/types";
 import { Post } from "../entities/Post";
+import { Like } from "../entities/Like";
 import {
   Arg,
   Ctx,
@@ -38,16 +39,27 @@ export class PostResolver {
     @Ctx() { req }: MyContext,
   ) {
     const { userId } = req.session;
+    const like = await Like.findOne({ where: { userId, postId } });
 
-    await AppDataSource.query(
-      `START TRANSACTION;
-    INSERT INTO "like" ("userId", "postId")
-    VALUES (${userId}, ${postId});
-    update post
-    set points = points + 1
-    where id = ${postId};
-    COMMIT;`,
-    );
+    // Remove like if exists, otherwise insert like
+    if (like) {
+      await AppDataSource.transaction(async (tm) => {
+        await like.remove();
+        await tm.query(`update post
+        set points = points - 1
+        where id = ${postId};`);
+      });
+    } else {
+      await AppDataSource.transaction(async (tm) => {
+        await tm.query(
+          `INSERT INTO "like" ("userId", "postId")
+          VALUES (${userId}, ${postId});`,
+        );
+        await tm.query(`update post
+        set points = points + 1
+        where id = ${postId};`);
+      });
+    }
 
     return true;
   }
