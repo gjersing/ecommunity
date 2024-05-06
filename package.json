@@ -1,7 +1,7 @@
 {
   "name": "ecommunity",
-  "version": "1.0.0",
-  "description": "The Neighborhood Nature App",
+  "version": "0.5.0",
+  "description": "Social Media For Nature Lovers",
   "main": "index.js",
   "scripts": {
     "watch": "tsc -w",

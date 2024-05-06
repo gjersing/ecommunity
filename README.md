@@ -1,4 +1,4 @@
-ECOmmunity - The Neighborhood Nature App
+ECOmmunity - Social Media For Nature Lovers
 
 This repository contains the backend server logic for the application.
 
