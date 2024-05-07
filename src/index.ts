@@ -18,6 +18,7 @@ import RedisStore from "connect-redis";
 import session from "express-session";
 import cors from "cors";
 import { AppDataSource } from "./data-source";
+import { createUserLoader } from "./utils/createUserLoader";
 
 const main = async () => {
   await AppDataSource.initialize();
@@ -59,7 +60,12 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ req, res, redis }),
+    context: ({ req, res }) => ({
+      req,
+      res,
+      redis,
+      userLoader: createUserLoader(),
+    }),
   });
 
   await apolloServer.start();

@@ -5,16 +5,19 @@ import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   InputType,
   Int,
   Mutation,
   ObjectType,
   Query,
   Resolver,
+  Root,
   UseMiddleware,
 } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { AppDataSource } from "../data-source";
+import { User } from "../entities/User";
 
 @InputType()
 class PostInput {
@@ -32,6 +35,11 @@ class PaginatedPosts {
 
 @Resolver(Post)
 export class PostResolver {
+  @FieldResolver(() => User)
+  author(@Root() post: Post, @Ctx() { userLoader }: MyContext) {
+    return userLoader.load(post.authorId);
+  }
+
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
   async like(
@@ -87,12 +95,9 @@ export class PostResolver {
 
     const posts = await AppDataSource.query(
       `
-    select p.*, 
-    json_build_object('id', u.id, 'username', u.username, 'email', u.email) author
-    ,
+    select p.*,
     (select "userId" from "like" where "userId" = $2 and "postId" = p.id) "likeStatus"
     from post p
-    inner join public.user u on u.id = p."authorId"
     ${cursor ? `where p."createdAt" < $3` : ""}
     order by p."createdAt" DESC
     limit $1
@@ -108,7 +113,7 @@ export class PostResolver {
 
   @Query(() => Post, { nullable: true })
   post(@Arg("id", () => Int) id: number): Promise<Post | null> {
-    return Post.findOne({ where: { id }, relations: ["author"] });
+    return Post.findOne({ where: { id } });
   }
 
   @Mutation(() => Post)
