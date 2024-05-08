@@ -19,6 +19,7 @@ import session from "express-session";
 import cors from "cors";
 import { AppDataSource } from "./data-source";
 import { createUserLoader } from "./utils/createUserLoader";
+import { createLikeStatusLoader } from "./utils/createLikeStatusLoader";
 
 const main = async () => {
   await AppDataSource.initialize();
@@ -65,6 +66,7 @@ const main = async () => {
       res,
       redis,
       userLoader: createUserLoader(),
+      likeStatusLoader: createLikeStatusLoader(),
     }),
   });
 

@@ -40,6 +40,23 @@ export class PostResolver {
     return userLoader.load(post.authorId);
   }
 
+  @FieldResolver(() => Int, { nullable: true })
+  async likeStatus(
+    @Root() post: Post,
+    @Ctx() { likeStatusLoader, req }: MyContext,
+  ) {
+    if (!req.session.userId) {
+      return null;
+    }
+
+    const like = await likeStatusLoader.load({
+      postId: post.id,
+      userId: req.session.userId,
+    });
+
+    return like ? 1 : null;
+  }
+
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
   async like(
@@ -80,14 +97,11 @@ export class PostResolver {
   async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
-    @Ctx() { req }: MyContext,
   ): Promise<PaginatedPosts> {
     const trueLimit = Math.min(20, limit);
     const trueLimitPlusOne = trueLimit + 1;
 
-    const { userId } = req.session;
-
-    const replacements: any[] = [trueLimitPlusOne, userId];
+    const replacements: any[] = [trueLimitPlusOne];
 
     if (cursor) {
       replacements.push(new Date(parseInt(cursor)));
@@ -95,10 +109,9 @@ export class PostResolver {
 
     const posts = await AppDataSource.query(
       `
-    select p.*,
-    (select "userId" from "like" where "userId" = $2 and "postId" = p.id) "likeStatus"
+    select p.*
     from post p
-    ${cursor ? `where p."createdAt" < $3` : ""}
+    ${cursor ? `where p."createdAt" < $2` : ""}
     order by p."createdAt" DESC
     limit $1
     `,
