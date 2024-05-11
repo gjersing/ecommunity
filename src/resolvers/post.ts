@@ -1,4 +1,4 @@
-import { MyContext } from "src/types";
+import { FieldError, MyContext } from "../types";
 import { Post } from "../entities/Post";
 import { Like } from "../entities/Like";
 import {
@@ -18,6 +18,11 @@ import {
 import { isAuth } from "../middleware/isAuth";
 import { AppDataSource } from "../data-source";
 import { User } from "../entities/User";
+import {
+  RegExpMatcher,
+  englishDataset,
+  englishRecommendedTransformers,
+} from "obscenity";
 
 @InputType()
 class PostInput {
@@ -31,6 +36,15 @@ class PaginatedPosts {
   posts: Post[];
   @Field()
   hasMore: boolean;
+}
+
+@ObjectType()
+class PostResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
+
+  @Field(() => Post, { nullable: true })
+  post?: Post;
 }
 
 @Resolver(Post)
@@ -129,13 +143,45 @@ export class PostResolver {
     return Post.findOne({ where: { id } });
   }
 
-  @Mutation(() => Post)
+  @Mutation(() => PostResponse)
   @UseMiddleware(isAuth)
   async createPost(
     @Arg("input") input: PostInput,
     @Ctx() { req }: MyContext,
-  ): Promise<Post> {
-    return Post.create({ ...input, authorId: req.session.userId }).save();
+  ): Promise<PostResponse> {
+    const profanityMatcher = new RegExpMatcher({
+      ...englishDataset.build(),
+      ...englishRecommendedTransformers,
+    });
+    if (input.body) {
+      if (profanityMatcher.hasMatch(input.body)) {
+        return {
+          errors: [
+            {
+              field: "body",
+              message:
+                "Caption contains inappropriate language that cannot be submitted.",
+            },
+          ],
+        };
+      } else if (input.body.length > 280) {
+        return {
+          errors: [
+            {
+              field: "body",
+              message:
+                "Caption is too long. The maximum length is 280 characters.",
+            },
+          ],
+        };
+      }
+    }
+
+    const post = await Post.create({
+      ...input,
+      authorId: req.session.userId,
+    }).save();
+    return { post };
   }
 
   @Mutation(() => Boolean)

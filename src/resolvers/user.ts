@@ -7,7 +7,7 @@ import {
   SESSION_COOKIE_NAME,
   __prod__,
 } from "../constants";
-import { MyContext } from "src/types";
+import { FieldError, MyContext } from "../types";
 import {
   Field,
   Query,
@@ -23,14 +23,6 @@ import { UsernamePasswordInput } from "./UsernamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
 import { sendEmail } from "../utils/mailer";
 import { AppDataSource } from "../data-source";
-
-@ObjectType()
-class FieldError {
-  @Field()
-  field: string;
-  @Field()
-  message: string;
-}
 
 @ObjectType()
 class UserResponse {
