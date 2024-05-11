@@ -1680,6 +1680,11 @@ object-inspect@^1.9.0:
   resolved "https://registry.yarnpkg.com/object-inspect/-/object-inspect-1.13.1.tgz#b96c6109324ccfef6b12216a956ca4dc2ff94bc2"
   integrity sha512-5qoj1RUiKOMsCCNLV1CBiPYE10sziTsnmNxkAI/rZhiD63CF7IqdFGC/XzjWjpSgLf0LxXX3bDFIh0E18f6UhQ==
 
+obscenity@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/obscenity/-/obscenity-0.2.1.tgz#31181b1969fcbc4d44285659a6d797e0d72fd9b8"
+  integrity sha512-84l2MZo41ZipfgYgYdRc3FNcktS/KCyun4LZSGgwkJD++BdMM4d+95fkKqWtxasSdfNKWHxdd6bswbEg0UtdXQ==
+
 on-finished@2.4.1:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/on-finished/-/on-finished-2.4.1.tgz#58c8c44116e54845ad57f14ab10b03533184ac3f"
