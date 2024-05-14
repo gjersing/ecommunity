@@ -1019,6 +1019,11 @@ diff@^4.0.1:
   resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
   integrity sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==
 
+dotenv-safe@^9.1.0:
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/dotenv-safe/-/dotenv-safe-9.1.0.tgz#670470f573fd6972e6b9d12396edf13d5f30b611"
+  integrity sha512-2qwVAnUN+EDpu41pIK1XiJpHXKHV9Dnti3cE1EnUXT1/BV5+B7xuSZtgZ/4LExkCpp5F6BGikraezQL+8hKCOA==
+
 dotenv@^16.0.3, dotenv@^16.4.5:
   version "16.4.5"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.5.tgz#cdd3b3b604cb327e286b4762e13502f717cb099f"
