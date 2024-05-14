@@ -1,8 +1,18 @@
+import {
+  englishDataset,
+  englishRecommendedTransformers,
+  RegExpMatcher,
+} from "obscenity";
 import { UsernamePasswordInput } from "src/resolvers/UsernamePasswordInput";
 
 const regexp = new RegExp(
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
 );
+
+const profanityMatcher = new RegExpMatcher({
+  ...englishDataset.build(),
+  ...englishRecommendedTransformers,
+});
 
 export const validateRegister = (options: UsernamePasswordInput) => {
   if (!regexp.test(options.email)) {
@@ -26,7 +36,16 @@ export const validateRegister = (options: UsernamePasswordInput) => {
     return [
       {
         field: "username",
-        message: "Length must be greater than 2 and less than 40",
+        message: "Length must be greater than 2 and less than 40.",
+      },
+    ];
+  }
+  if (profanityMatcher.hasMatch(options.username)) {
+    return [
+      {
+        field: "username",
+        message:
+          "Username contains inappropriate language that cannot be submitted.",
       },
     ];
   }
@@ -34,7 +53,7 @@ export const validateRegister = (options: UsernamePasswordInput) => {
     return [
       {
         field: "password",
-        message: "Length must be greater than 3",
+        message: "Length must be greater than 3.",
       },
     ];
   }
