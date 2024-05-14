@@ -1,5 +1,4 @@
 import { DataSource } from "typeorm";
-import "dotenv-safe/config";
 import path from "path";
 
 export const AppDataSource = new DataSource({
