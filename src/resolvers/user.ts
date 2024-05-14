@@ -1,8 +1,6 @@
 import { User } from "../entities/User";
 import argon2 from "argon2";
 import {
-  LOCAL_ORIGIN,
-  PROD_ORIGIN,
   RESET_PASSWORD_PREFIX,
   SESSION_COOKIE_NAME,
   __prod__,
@@ -214,7 +212,7 @@ export class UserResolver {
       return true;
     }
 
-    const url = __prod__ ? PROD_ORIGIN : LOCAL_ORIGIN;
+    const url = process.env.CORS_ORIGIN;
     const token = crypto.randomUUID();
     await redis.set(RESET_PASSWORD_PREFIX + token, user.id, "EX", 3600 * 72);
 

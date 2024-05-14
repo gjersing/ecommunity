@@ -4,6 +4,7 @@ FROM node:21
 
 WORKDIR /app
 COPY . .
+COPY .env.production .env
 
 RUN yarn
 RUN yarn build

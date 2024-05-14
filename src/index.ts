@@ -3,13 +3,7 @@ import "dotenv/config";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
-import {
-  LOCAL_ORIGIN,
-  PROD_ORIGIN,
-  SESSION_COOKIE_NAME,
-  __port__,
-  __prod__,
-} from "./constants";
+import { SESSION_COOKIE_NAME, __prod__ } from "./constants";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
@@ -26,7 +20,7 @@ const main = async () => {
 
   const app = express();
 
-  const redis = new Redis();
+  const redis = new Redis(process.env.REDIS_URL);
   const redisStore = new RedisStore({
     client: redis,
     prefix: "myapp:",
@@ -35,7 +29,7 @@ const main = async () => {
 
   app.use(
     cors({
-      origin: __prod__ ? PROD_ORIGIN : LOCAL_ORIGIN,
+      origin: process.env.CORS_ORIGIN,
       credentials: true,
     }),
   );
@@ -49,8 +43,9 @@ const main = async () => {
         httpOnly: true,
         sameSite: "lax",
         secure: __prod__,
+        domain: __prod__ ? ".ecommunity.us" : undefined, // TO DO: verify domain
       },
-      secret: "NONENVTESTSTRING",
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
     }),
@@ -76,8 +71,8 @@ const main = async () => {
     cors: false,
   });
 
-  app.listen(__port__, () => {
-    console.log(`Server started successfully on localhost:${__port__}`);
+  app.listen(parseInt(process.env.PORT), () => {
+    console.log(`Server started successfully on localhost:${process.env.PORT}`);
   });
 };
 
