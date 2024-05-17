@@ -44,7 +44,7 @@ const main = async () => {
         httpOnly: true,
         sameSite: "lax",
         secure: __prod__,
-        domain: __prod__ ? ".ecommunity.us" : undefined, // TO DO: verify domain
+        domain: __prod__ ? ".ecommunity.us" : undefined,
       },
       secret: process.env.SESSION_SECRET,
       resave: false,
