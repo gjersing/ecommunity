@@ -190,7 +190,11 @@ export class PostResolver {
     @Arg("id", () => Int) id: number,
     @Ctx() { req }: MyContext,
   ): Promise<boolean> {
-    await Post.delete({ id, authorId: req.session.userId });
+    if (req.session.userId == 1) {
+      await Post.delete({ id });
+    } else {
+      await Post.delete({ id, authorId: req.session.userId });
+    }
     return true;
   }
 
@@ -201,15 +205,27 @@ export class PostResolver {
     @Arg("body", () => String, { nullable: true }) body: string,
     @Ctx() { req }: MyContext,
   ): Promise<Post | null> {
-    const result = await AppDataSource.createQueryBuilder()
-      .update(Post)
-      .set({ body })
-      .where('id = :id and "authorId" = :authorId', {
-        id,
-        authorId: req.session.userId,
-      })
-      .returning("*")
-      .execute();
+    let result = null;
+    if (req.session.userId === 1) {
+      result = await AppDataSource.createQueryBuilder()
+        .update(Post)
+        .set({ body })
+        .where("id = :id", {
+          id,
+        })
+        .returning("*")
+        .execute();
+    } else {
+      result = await AppDataSource.createQueryBuilder()
+        .update(Post)
+        .set({ body })
+        .where('id = :id and "authorId" = :authorId', {
+          id,
+          authorId: req.session.userId,
+        })
+        .returning("*")
+        .execute();
+    }
 
     return result.raw[0];
   }

@@ -17,6 +17,7 @@ import { createLikeStatusLoader } from "./utils/createLikeStatusLoader";
 
 const main = async () => {
   await AppDataSource.initialize();
+  await AppDataSource.runMigrations();
 
   const app = express();
 
