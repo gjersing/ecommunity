@@ -9,7 +9,9 @@ node_modules/
 dist/
 
 .env
+ecommunity-423817-d3ad91c2b7f7.json
 .env.development.local
 .env.test.local
+.env.production
 .env.production.local
 .env.local

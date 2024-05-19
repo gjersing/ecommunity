@@ -36,6 +36,13 @@ const main = async () => {
     }),
   );
 
+  // dynamically import graphqlUploadExpress to get .mjs esm
+  const { default: graphqlUploadExpress } = await (eval(
+    `import('graphql-upload/graphqlUploadExpress.mjs')`,
+  ) as Promise<typeof import("graphql-upload/graphqlUploadExpress.mjs")>);
+
+  app.use(graphqlUploadExpress({ maxFileSize: 5000000, maxFiles: 1 }));
+
   app.use(
     session({
       name: SESSION_COOKIE_NAME,
