@@ -1,4 +1,5 @@
 import { FieldError, MyContext } from "../types";
+import { Storage } from "@google-cloud/storage";
 import { Post } from "../entities/Post";
 import { Like } from "../entities/Like";
 import {
@@ -23,6 +24,9 @@ import {
   englishDataset,
   englishRecommendedTransformers,
 } from "obscenity";
+import path from "path";
+import { FileUpload } from "graphql-upload/processRequest.mjs";
+const GraphQLUpload = require("graphql-upload/public/graphQLUpload.js");
 
 @InputType()
 class PostInput {
@@ -43,9 +47,17 @@ class PostResponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
-  @Field(() => Post, { nullable: true })
-  post?: Post;
+  @Field(() => Boolean, { nullable: true })
+  post?: boolean;
 }
+
+const storage = new Storage({
+  keyFilename: path.join(
+    __dirname,
+    "../../ecommunity-423817-d3ad91c2b7f7.json",
+  ),
+});
+const bucketName = "eco-images";
 
 @Resolver(Post)
 export class PostResolver {
@@ -146,7 +158,10 @@ export class PostResolver {
   @Mutation(() => PostResponse)
   @UseMiddleware(isAuth)
   async createPost(
-    @Arg("input") input: PostInput,
+    @Arg("file", () => GraphQLUpload)
+    { createReadStream, filename }: FileUpload,
+    @Arg("input")
+    input: PostInput,
     @Ctx() { req }: MyContext,
   ): Promise<PostResponse> {
     const profanityMatcher = new RegExpMatcher({
@@ -177,11 +192,36 @@ export class PostResolver {
       }
     }
 
-    const post = await Post.create({
-      ...input,
-      authorId: req.session.userId,
-    }).save();
-    return { post };
+    let imgUrl = "";
+    await new Promise((resolve, reject) =>
+      createReadStream()
+        .pipe(
+          storage
+            .bucket(bucketName)
+            .file(filename)
+            .createWriteStream({ resumable: false, gzip: true }),
+        )
+        .on("error", () => {
+          reject;
+        })
+        .on("finish", () =>
+          storage
+            .bucket(bucketName)
+            .file(filename)
+            .makePublic()
+            .then(async (e: any) => {
+              imgUrl = `https://storage.googleapis.com/eco-images/${e[0].object}`;
+              const post = await Post.create({
+                ...input,
+                authorId: req.session.userId,
+                img: imgUrl,
+              }).save();
+              resolve(post);
+            }),
+        ),
+    );
+
+    return { post: true };
   }
 
   @Mutation(() => Boolean)

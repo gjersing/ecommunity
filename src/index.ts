@@ -14,9 +14,11 @@ import cors from "cors";
 import { AppDataSource } from "./data-source";
 import { createUserLoader } from "./utils/createUserLoader";
 import { createLikeStatusLoader } from "./utils/createLikeStatusLoader";
+const graphqlUploadExpress = require("graphql-upload/public/graphqlUploadExpress.js");
 
 const main = async () => {
   await AppDataSource.initialize();
+  // await AppDataSource.dropDatabase();
   await AppDataSource.runMigrations();
 
   const app = express();
@@ -35,11 +37,6 @@ const main = async () => {
       credentials: true,
     }),
   );
-
-  // dynamically import graphqlUploadExpress to get .mjs esm
-  const { default: graphqlUploadExpress } = await (eval(
-    `import('graphql-upload/graphqlUploadExpress.mjs')`,
-  ) as Promise<typeof import("graphql-upload/graphqlUploadExpress.mjs")>);
 
   app.use(graphqlUploadExpress({ maxFileSize: 5000000, maxFiles: 1 }));
 
