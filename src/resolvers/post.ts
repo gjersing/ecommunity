@@ -25,8 +25,8 @@ import {
   englishRecommendedTransformers,
 } from "obscenity";
 import path from "path";
-import { FileUpload } from "graphql-upload/processRequest.mjs";
-const GraphQLUpload = require("graphql-upload/public/graphQLUpload.js");
+import { FileUpload } from "graphql-upload";
+import { GraphQLUpload } from "graphql-upload";
 
 @InputType()
 class PostInput {

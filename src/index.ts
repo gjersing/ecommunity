@@ -14,7 +14,7 @@ import cors from "cors";
 import { AppDataSource } from "./data-source";
 import { createUserLoader } from "./utils/createUserLoader";
 import { createLikeStatusLoader } from "./utils/createLikeStatusLoader";
-const graphqlUploadExpress = require("graphql-upload/public/graphqlUploadExpress.js");
+import { graphqlUploadExpress } from "graphql-upload";
 
 const main = async () => {
   await AppDataSource.initialize();
