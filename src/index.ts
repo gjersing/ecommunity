@@ -39,9 +39,9 @@ const main = async () => {
     }),
   );
 
-  bodyParser.json({ limit: "11mb" });
-  app.use(express.json({ limit: "11mb" }));
-  app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 1 }));
+  app.use(bodyParser.json({ limit: "20mb" }));
+  app.use(express.json({ limit: "20mb" }));
+  app.use(graphqlUploadExpress({ maxFileSize: 20000000, maxFiles: 1 }));
 
   app.use(
     session({
