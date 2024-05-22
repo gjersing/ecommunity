@@ -15,6 +15,7 @@ import { AppDataSource } from "./data-source";
 import { createUserLoader } from "./utils/createUserLoader";
 import { createLikeStatusLoader } from "./utils/createLikeStatusLoader";
 import { graphqlUploadExpress } from "graphql-upload";
+import bodyParser from "body-parser";
 
 const main = async () => {
   await AppDataSource.initialize();
@@ -38,7 +39,9 @@ const main = async () => {
     }),
   );
 
-  app.use(graphqlUploadExpress({ maxFileSize: 5000000, maxFiles: 1 }));
+  bodyParser.json({ limit: "11mb" });
+  app.use(express.json({ limit: "11mb" }));
+  app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 1 }));
 
   app.use(
     session({
