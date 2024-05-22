@@ -1,5 +1,7 @@
 ECOmmunity - Social Media For Nature Lovers
 
+https://www.ecommunity.us
+
 This repository contains the backend server logic for the application.
 
 Tech: GraphQL, Node, Express, TypeORM, Postgresql
