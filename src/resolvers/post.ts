@@ -72,6 +72,11 @@ export class PostResolver {
     return userLoader.load(post.authorId);
   }
 
+  @FieldResolver(() => [Comment], { nullable: true })
+  async comments(@Root() post: Post) {
+    return Comment.findBy({ postId: post.id });
+  }
+
   @FieldResolver(() => Int, { nullable: true })
   async likeStatus(
     @Root() post: Post,
@@ -130,8 +135,14 @@ export class PostResolver {
         ],
       };
     }
+    const user = await User.findOne({ where: { id: userId } });
 
-    await Comment.create({ userId, postId, body }).save();
+    await Comment.create({
+      userId,
+      postId,
+      body,
+      username: user?.username,
+    }).save();
 
     return { post: true };
   }
@@ -139,13 +150,13 @@ export class PostResolver {
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
   async deleteComment(
-    @Arg("postId", () => Int) postId: number,
+    @Arg("id", () => Int) id: number,
     @Ctx() { req }: MyContext,
   ): Promise<boolean> {
     if (req.session.userId == 1) {
-      await Comment.delete({ postId });
+      await Comment.delete({ id });
     } else {
-      await Comment.delete({ postId, userId: req.session.userId });
+      await Comment.delete({ id, userId: req.session.userId });
     }
     return true;
   }
@@ -153,7 +164,7 @@ export class PostResolver {
   @Mutation(() => Comment, { nullable: true })
   @UseMiddleware(isAuth)
   async updateComment(
-    @Arg("postId", () => Int) postId: number,
+    @Arg("id", () => Int) id: number,
     @Arg("body", () => String) body: string,
     @Ctx() { req }: MyContext,
   ): Promise<Comment | null> {
@@ -162,8 +173,8 @@ export class PostResolver {
       result = await AppDataSource.createQueryBuilder()
         .update(Comment)
         .set({ body })
-        .where("postId = :postId", {
-          postId,
+        .where("id = :id", {
+          id,
         })
         .returning("*")
         .execute();
@@ -171,8 +182,8 @@ export class PostResolver {
       result = await AppDataSource.createQueryBuilder()
         .update(Comment)
         .set({ body })
-        .where('postId = :postId and "userId" = :userId', {
-          postId,
+        .where('id = :id and "userId" = :userId', {
+          id,
           userId: req.session.userId,
         })
         .returning("*")

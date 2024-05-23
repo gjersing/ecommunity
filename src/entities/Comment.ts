@@ -1,18 +1,30 @@
-import { Field, ObjectType } from "type-graphql";
-import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
-import { User } from "./User";
+import { Field, Int, ObjectType } from "type-graphql";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import { Post } from "./Post";
 
 @ObjectType()
 @Entity()
 export class Comment extends BaseEntity {
+  @Field(() => Int)
+  @PrimaryGeneratedColumn()
+  id!: number;
+
   @Field()
-  @PrimaryColumn()
+  @Column()
   userId: number;
 
-  @Field(() => User)
-  @ManyToOne(() => User, (user) => user.comments)
-  user: User;
+  @Field(() => String, { nullable: true })
+  @Column()
+  username: string;
 
   @Field()
   @PrimaryColumn()
@@ -27,4 +39,12 @@ export class Comment extends BaseEntity {
   @Field()
   @Column()
   body!: string;
+
+  @Field(() => String)
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @Field(() => String)
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
