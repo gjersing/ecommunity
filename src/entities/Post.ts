@@ -11,6 +11,7 @@ import {
 } from "typeorm";
 import { User } from "./User";
 import { Like } from "./Like";
+import { Comment } from "./Comment";
 
 @ObjectType() // Identifies class to GraphQL
 @Entity()
@@ -44,6 +45,10 @@ export class Post extends BaseEntity {
 
   @OneToMany(() => Like, (like) => like.post)
   likes: Like[];
+
+  @Field(() => [Comment], { nullable: true })
+  @OneToMany(() => Comment, (comment) => comment.post)
+  comments: Comment[];
 
   @Field(() => String)
   @CreateDateColumn()

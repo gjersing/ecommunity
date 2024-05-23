@@ -2,6 +2,7 @@ import { FieldError, MyContext } from "../types";
 import { Storage } from "@google-cloud/storage";
 import { Post } from "../entities/Post";
 import { Like } from "../entities/Like";
+import { Comment } from "../entities/Comment";
 import {
   Arg,
   Ctx,
@@ -59,6 +60,11 @@ const storage = new Storage({
 });
 const bucketName = "eco-images";
 
+const profanityMatcher = new RegExpMatcher({
+  ...englishDataset.build(),
+  ...englishRecommendedTransformers,
+});
+
 @Resolver(Post)
 export class PostResolver {
   @FieldResolver(() => User)
@@ -81,6 +87,99 @@ export class PostResolver {
     });
 
     return like ? 1 : null;
+  }
+
+  @Mutation(() => PostResponse)
+  @UseMiddleware(isAuth)
+  async comment(
+    @Arg("postId", () => Int) postId: number,
+    @Arg("body", () => String) body: string,
+    @Ctx() { req }: MyContext,
+  ): Promise<PostResponse> {
+    const { userId } = req.session;
+
+    if (!body) {
+      return {
+        errors: [
+          {
+            field: "body",
+            message: "Comment cannot be blank.",
+          },
+        ],
+      };
+    }
+
+    if (profanityMatcher.hasMatch(body)) {
+      return {
+        errors: [
+          {
+            field: "body",
+            message:
+              "Comment contains inappropriate language that cannot be submitted.",
+          },
+        ],
+      };
+    } else if (body.length > 200) {
+      return {
+        errors: [
+          {
+            field: "body",
+            message:
+              "Comment is too long. The maximum length is 200 characters.",
+          },
+        ],
+      };
+    }
+
+    await Comment.create({ userId, postId, body }).save();
+
+    return { post: true };
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async deleteComment(
+    @Arg("postId", () => Int) postId: number,
+    @Ctx() { req }: MyContext,
+  ): Promise<boolean> {
+    if (req.session.userId == 1) {
+      await Comment.delete({ postId });
+    } else {
+      await Comment.delete({ postId, userId: req.session.userId });
+    }
+    return true;
+  }
+
+  @Mutation(() => Comment, { nullable: true })
+  @UseMiddleware(isAuth)
+  async updateComment(
+    @Arg("postId", () => Int) postId: number,
+    @Arg("body", () => String) body: string,
+    @Ctx() { req }: MyContext,
+  ): Promise<Comment | null> {
+    let result = null;
+    if (req.session.userId === 1) {
+      result = await AppDataSource.createQueryBuilder()
+        .update(Comment)
+        .set({ body })
+        .where("postId = :postId", {
+          postId,
+        })
+        .returning("*")
+        .execute();
+    } else {
+      result = await AppDataSource.createQueryBuilder()
+        .update(Comment)
+        .set({ body })
+        .where('postId = :postId and "userId" = :userId', {
+          postId,
+          userId: req.session.userId,
+        })
+        .returning("*")
+        .execute();
+    }
+
+    return result.raw[0];
   }
 
   @Mutation(() => Boolean)
@@ -164,10 +263,6 @@ export class PostResolver {
     input: PostInput,
     @Ctx() { req }: MyContext,
   ): Promise<PostResponse> {
-    const profanityMatcher = new RegExpMatcher({
-      ...englishDataset.build(),
-      ...englishRecommendedTransformers,
-    });
     if (input.body) {
       if (profanityMatcher.hasMatch(input.body)) {
         return {
