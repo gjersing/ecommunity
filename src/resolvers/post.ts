@@ -52,6 +52,15 @@ class PostResponse {
   post?: boolean;
 }
 
+@ObjectType()
+class CommentResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
+
+  @Field(() => Comment, { nullable: true })
+  comment?: Comment;
+}
+
 const storage = new Storage({
   keyFilename: path.join(
     __dirname,
@@ -94,13 +103,13 @@ export class PostResolver {
     return like ? 1 : null;
   }
 
-  @Mutation(() => PostResponse)
+  @Mutation(() => CommentResponse)
   @UseMiddleware(isAuth)
   async comment(
     @Arg("postId", () => Int) postId: number,
     @Arg("body", () => String) body: string,
     @Ctx() { req }: MyContext,
-  ): Promise<PostResponse> {
+  ): Promise<CommentResponse> {
     const { userId } = req.session;
 
     if (!body) {
@@ -137,14 +146,14 @@ export class PostResolver {
     }
     const user = await User.findOne({ where: { id: userId } });
 
-    await Comment.create({
+    const comment = await Comment.create({
       userId,
       postId,
       body,
       username: user?.username,
     }).save();
 
-    return { post: true };
+    return { comment };
   }
 
   @Mutation(() => Boolean)
