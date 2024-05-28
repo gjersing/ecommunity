@@ -44,6 +44,14 @@ class PaginatedPosts {
 }
 
 @ObjectType()
+class ProfilePosts {
+  @Field(() => Boolean)
+  isReal: boolean;
+  @Field(() => [Post])
+  posts: Post[];
+}
+
+@ObjectType()
 class PostResponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
@@ -272,6 +280,35 @@ export class PostResolver {
   @Query(() => Post, { nullable: true })
   post(@Arg("id", () => Int) id: number): Promise<Post | null> {
     return Post.findOne({ where: { id } });
+  }
+
+  @Query(() => ProfilePosts)
+  async userPosts(
+    @Arg("username", () => String) username: string,
+  ): Promise<ProfilePosts> {
+    const author = await User.findOne({ where: { username } });
+
+    if (author) {
+      const posts = await AppDataSource.query(
+        `
+      select p.*
+      from post p
+      where p."authorId" = $1
+      order by p."createdAt" DESC
+      `,
+        [author.id],
+      );
+
+      return {
+        isReal: true,
+        posts: posts,
+      };
+    } else {
+      return {
+        isReal: false,
+        posts: [],
+      };
+    }
   }
 
   @Mutation(() => PostResponse)
